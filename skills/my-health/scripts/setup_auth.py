@@ -12,19 +12,7 @@ AUTH_URL = "https://epicproxy.et0909.epichosted.com/APIProxyPRD/oauth2/authorize
 TOKEN_URL = "https://epicproxy.et0909.epichosted.com/APIProxyPRD/oauth2/token"
 FHIR_BASE = "https://fhir.mdanderson.org/FHIR/api/FHIR/R4"
 
-SCOPES = " ".join([
-    "patient/Patient.read",
-    "patient/Condition.read",
-    "patient/MedicationRequest.read",
-    "patient/AllergyIntolerance.read",
-    "patient/Observation.read",
-    "patient/Procedure.read",
-    "patient/DiagnosticReport.read",
-    "patient/Appointment.read",
-    "patient/CareTeam.read",
-    "patient/DocumentReference.read",
-    "openid", "fhirUser", "offline_access",
-])
+SCOPES = "openid offline_access"
 
 state = secrets.token_hex(16)
 params = urllib.parse.urlencode({
