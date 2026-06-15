@@ -1,19 +1,56 @@
 <!DOCTYPE html>
 <html>
-<head><title>Epic OAuth Callback</title></head>
+<head><title>Health Data Connected</title>
+<style>
+  body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; }
+  .box { background: white; border-radius: 12px; padding: 40px; text-align: center; max-width: 400px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+  .icon { font-size: 48px; }
+  h2 { margin: 16px 0 8px; color: #1a1a1a; }
+  p { color: #666; margin: 0; }
+  .spinner { border: 3px solid #eee; border-top: 3px solid #007aff; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; margin: 16px auto; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
 <body>
+<div class="box" id="box">
+  <div class="spinner"></div>
+  <h2>Connecting...</h2>
+  <p>Sending auth code to your agent</p>
+</div>
 <script>
+  const RELAY_URL = "https://epic-token-relay-production.up.railway.app";
+  const RELAY_SECRET = "48cccd5f0f5e88c278276c60de9d5b4d5c18e78cc174f601f6fd22d802c0a0fb";
+
   const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const error = params.get('error');
-  if (code) {
-    document.write('<h2>Auth code received!</h2><p>Copy this code:</p><code style="font-size:14px;word-break:break-all">' + code + '</code>');
-    console.log('CODE:', code);
-  } else if (error) {
-    document.write('<h2>Error: ' + error + '</h2>');
-  } else {
-    document.write('<p>Waiting...</p>');
+  const code = params.get("code");
+  const error = params.get("error");
+
+  async function send() {
+    if (error) {
+      document.getElementById("box").innerHTML = '<div class="icon">❌</div><h2>Auth Error</h2><p>' + error + '</p>';
+      return;
+    }
+    if (!code) {
+      document.getElementById("box").innerHTML = '<div class="icon">⚠️</div><h2>No code found</h2><p>Try again</p>';
+      return;
+    }
+    try {
+      const res = await fetch(RELAY_URL + "/code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-relay-secret": RELAY_SECRET },
+        body: JSON.stringify({ code })
+      });
+      if (res.ok) {
+        document.getElementById("box").innerHTML = '<div class="icon">✅</div><h2>Done!</h2><p>Your agent is reconnected. You can close this tab.</p>';
+      } else {
+        throw new Error("relay returned " + res.status);
+      }
+    } catch (e) {
+      // Fallback: show code for manual paste
+      document.getElementById("box").innerHTML = '<div class="icon">⚠️</div><h2>Auto-send failed</h2><p>Paste this code to your bot:</p><code style="font-size:11px;word-break:break-all;display:block;margin-top:12px;padding:8px;background:#f5f5f5;border-radius:6px">' + code + '</code>';
+    }
   }
+  send();
 </script>
 </body>
 </html>
