@@ -101,6 +101,22 @@ def exchange_code(code):
     log("Token saved from relay code")
     return True
 
+def push_cache_to_relay():
+    if not RELAY_URL or not RELAY_SECRET or not CACHE_FILE.exists():
+        return
+    try:
+        data = CACHE_FILE.read_bytes()
+        req = urllib.request.Request(
+            f"{RELAY_URL}/health-cache",
+            data=data,
+            headers={"Content-Type": "application/json", "x-relay-secret": RELAY_SECRET},
+            method="POST"
+        )
+        urllib.request.urlopen(req, timeout=15)
+        log("Health cache pushed to relay")
+    except Exception as e:
+        log(f"Relay push failed: {e}")
+
 def rebuild_cache():
     import subprocess
     result = subprocess.run(
@@ -109,6 +125,7 @@ def rebuild_cache():
     )
     if result.returncode == 0:
         log("Cache rebuilt")
+        push_cache_to_relay()
     else:
         log(f"Cache rebuild failed: {result.stderr[:200]}")
 
