@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Epic OAuth Callback</title></head>
+<body>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+  if (code) {
+    document.write('<h2>Auth code received!</h2><p>Copy this code:</p><code style="font-size:14px;word-break:break-all">' + code + '</code>');
+    console.log('CODE:', code);
+  } else if (error) {
+    document.write('<h2>Error: ' + error + '</h2>');
+  } else {
+    document.write('<p>Waiting...</p>');
+  }
+</script>
+</body>
+</html>
